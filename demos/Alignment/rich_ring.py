@@ -75,3 +75,32 @@ class Ring:
 
         """
         self.__init__(x, y)
+
+
+class Noisy_Ring(Ring):
+    def __init__(self, x, y):
+        super().__init__(x, y)
+
+    def boundary(self, n, noise=0.05):
+        """
+        Returns two n-length arrays (x, y) of x and y co-ordinates of the ring edges, with some random noise
+
+        Not guaranteed to start at any particular angle - i.e.
+
+        """
+        exact_x, exact_y = super().boundary(n)
+
+        noise_mag = np.random.normal(scale=noise, size=n)
+        noise_angle = 2 * np.pi * np.random.uniform(size=n)
+
+        noise_x = noise_mag * np.cos(noise_angle)
+        noise_y = noise_mag * np.sin(noise_angle)
+
+        return exact_x + noise_x, exact_y + noise_y
+
+    def misalignment(self, boundary_x, boundary_y):
+        """
+        Returns distance from origin of these points
+
+        """
+        return np.sqrt(boundary_x ** 2 + boundary_y ** 2)
