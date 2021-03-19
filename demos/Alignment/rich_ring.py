@@ -93,6 +93,19 @@ class Noisy_Ring(Ring):
         self._x_error = noise_mag * np.cos(noise_angle)
         self._y_error = noise_mag * np.sin(noise_angle)
 
+    def _should_find_errors(self, force, n, noise_level):
+        """
+        Find whether we need to recalculate the errs
+
+        """
+        # If we haven't yet calculated them, we have changed n or the noise level or if we explicitly asked to
+        return bool(
+            force
+            or (self._x_error is None)
+            or len(self._x_error) != n
+            or self._noise != noise_level
+        )
+
     def __init__(self, x, y):
         super().__init__(x, y)
 
@@ -103,24 +116,21 @@ class Noisy_Ring(Ring):
         Not guaranteed to start at any particular angle - i.e.
 
         """
-        # Re set the errors if we haven't yet calculated them, we have changed n or the noise level or if we explicitly asked to
-        recalculate_errors = (
-            new_errors
-            or (self._x_error is None)
-            or len(self._x_error) != n
-            or self._noise != noise
-        )
-        print(recalculate_errors)
-        if recalculate_errors:
+        if self._should_find_errors(new_errors, n, noise):
             self._set_error(n, noise)
 
         exact_x, exact_y = super().boundary(n)
 
-        return exact_x + self._x_error, exact_y + self._y_error 
+        return exact_x + self._x_error, exact_y + self._y_error
 
-    def misalignment(self, boundary_x, boundary_y):
+    def misalignment(self, n, noise=0.05):
         """
         Returns distance from origin of these points
 
         """
+        if self._should_find_errors(False, n, noise):
+            self._set_error(n, noise)
+
+        x, y = self.boundary(n, noise)
+
         return np.sqrt(boundary_x ** 2 + boundary_y ** 2)
