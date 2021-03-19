@@ -78,25 +78,45 @@ class Ring:
 
 
 class Noisy_Ring(Ring):
+
+    # Cache positional errors
+    _noise = None
+    _x_error = None
+    _y_error = None
+
+    def _set_error(self, n, level=0.05):
+        self._noise = level
+
+        noise_mag = np.random.normal(scale=self._noise, size=n)
+        noise_angle = 2 * np.pi * np.random.uniform(size=n)
+
+        self._x_error = noise_mag * np.cos(noise_angle)
+        self._y_error = noise_mag * np.sin(noise_angle)
+
     def __init__(self, x, y):
         super().__init__(x, y)
 
-    def boundary(self, n, noise=0.05):
+    def boundary(self, n, noise=0.05, new_errors=False):
         """
         Returns two n-length arrays (x, y) of x and y co-ordinates of the ring edges, with some random noise
 
         Not guaranteed to start at any particular angle - i.e.
 
         """
+        # Re set the errors if we haven't yet calculated them, we have changed n or the noise level or if we explicitly asked to
+        recalculate_errors = (
+            new_errors
+            or (self._x_error is None)
+            or len(self._x_error) != n
+            or self._noise != noise
+        )
+        print(recalculate_errors)
+        if recalculate_errors:
+            self._set_error(n, noise)
+
         exact_x, exact_y = super().boundary(n)
 
-        noise_mag = np.random.normal(scale=noise, size=n)
-        noise_angle = 2 * np.pi * np.random.uniform(size=n)
-
-        noise_x = noise_mag * np.cos(noise_angle)
-        noise_y = noise_mag * np.sin(noise_angle)
-
-        return exact_x + noise_x, exact_y + noise_y
+        return exact_x + self._x_error, exact_y + self._y_error 
 
     def misalignment(self, boundary_x, boundary_y):
         """
