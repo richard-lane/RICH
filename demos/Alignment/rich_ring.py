@@ -127,10 +127,17 @@ class Noisy_Ring(Ring):
         """
         Returns distance from origin of these points
 
+        Returns also the angles
+
         """
         if self._should_find_errors(False, n, noise):
             self._set_error(n, noise)
 
         x, y = self.boundary(n, noise)
 
-        return np.sqrt(boundary_x ** 2 + boundary_y ** 2)
+        distances = np.sqrt(x ** 2 + y ** 2)
+
+        angles = np.arctan2(y, x)
+        angles[angles < 0] += 2 * np.pi
+
+        return distances, angles
