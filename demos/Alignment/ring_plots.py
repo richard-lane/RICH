@@ -7,6 +7,7 @@ from matplotlib.widgets import Slider
 from matplotlib.patches import Arc
 import numpy as np
 
+
 def _empty_figure(figsize):
     """
     Create a blank figure for visualising the RICH alignment procedure
@@ -35,7 +36,7 @@ def _empty_figure(figsize):
     return ax, ax2
 
 
-def _setup_diagram(ax):
+def _setup_diagram(ax, style="k--"):
     """
     Init all the components in the ring diagram
     
@@ -43,7 +44,7 @@ def _setup_diagram(ax):
     
     """
     # Cherenkov Ring
-    ring, = ax.plot(0, 0, "k--")
+    ring, = ax.plot(0, 0, style)
 
     # Tracking spot and ring centre
     ax.plot(0, 0, "r.", label="Tracking Spot")
@@ -63,7 +64,7 @@ def _setup_diagram(ax):
     return ring, ring_centre, horizontal, angled_line, phi_label, r_label
 
 
-def _setup_plot(ax2):
+def _setup_plot(ax2, markerstyle=None, linestyle="-"):
     """
     Init all the components in the r(phi) plot
     
@@ -72,6 +73,11 @@ def _setup_plot(ax2):
     """
     # Plot the distance from the tracking spot to the ring as a function of angle
     line, = ax2.plot((0, np.pi), (0, 2))
+    if markerstyle is not None:
+        line.set_marker(markerstyle)
+    if linestyle is not None:
+        line.set_ls(linestyle)
+
     title = ax2.set_title("")
 
     return line, title
