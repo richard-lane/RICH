@@ -71,6 +71,7 @@ def old_spanning_tree(line, regex):
 
 
 def plot(array, title, path):
+    plt.clf()
     f, ax = plt.subplots(1, 1)
     axcolor = f.add_axes()
     im = ax.matshow(array, norm=LogNorm(vmin=10, vmax=1000000))
@@ -94,6 +95,7 @@ def plot(array, title, path):
     f.suptitle(title)
     print(f"Creating {title}")
     plt.savefig(path)
+    plt.clf()
 
 
 def main():
@@ -143,6 +145,24 @@ def main():
     plot(old_occupancies, "Old Spanning Tree", "old.png")
     plot(mst_occupancies, "MST Occupancies (new)", "mst.png")
     plot(all_occupancies, "All Combinations", "all.png")
+
+    # Also plot histograms of occupancies
+    kw = {"bins": np.logspace(-1, 6, 25), "alpha": 0.4}
+    plt.hist(all_occupancies.flatten(), **kw, label="all", color="r")
+    plt.hist(mst_occupancies.flatten(), **kw, label="mst", color="k")
+    kw["histtype"] = "step"
+    plt.hist(old_occupancies.flatten(), **kw, label="old", color="b")
+    plt.legend()
+    plt.xscale("log")
+    plt.title("Number of mirror pairs with a given occupancy")
+    plt.text(
+        0.05,
+        9.5,
+        "Can see that the MST\nhas selected the highest\noccupancy combinations, and has\ngenerally chosen higher occupancy\ncombinations than the old ST",
+    )
+    plt.xlabel("Occupancy")
+    plt.ylabel("Number of Mirror pairs")
+    plt.savefig("hists.png")
 
 
 if __name__ == "__main__":
